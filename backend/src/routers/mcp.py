@@ -43,7 +43,7 @@ class UpdateTaskRequest(BaseModel):
 
 
 # Create router for MCP tools
-router = APIRouter(prefix="/mcp", tags=["mcp"])
+router = APIRouter(tags=["mcp"])
 
 
 @router.post("/add_task")

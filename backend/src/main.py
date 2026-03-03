@@ -13,7 +13,7 @@ class ForceHTTPSMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        if scope["type"] in ("https", "websocket"):
+        if scope["type"] in ("http", "websocket"):
             headers = dict(scope.get("headers", []))
             if headers.get(b"x-forwarded-proto") == b"https":
                 scope["scheme"] = "https"
@@ -29,6 +29,11 @@ app.add_middleware(ForceHTTPSMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
+        "http://localhost:3004",
         "https://localhost:3000",
         "https://localhost:3001",
         "https://localhost:3002",
