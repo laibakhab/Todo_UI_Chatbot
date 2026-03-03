@@ -181,9 +181,6 @@ def chat_endpoint(
 
         print(f"DEBUG: Authorized user_id_int: {user_id_int}")
 
-        # Cast user_id to string for DB queries (DB column is varchar)
-        user_id_str = str(user_id_int)
-
         # Get or create conversation
         conversation = None
         if request.conversation_id:
@@ -192,7 +189,7 @@ def chat_endpoint(
                 conversation_id_int = int(request.conversation_id)
                 statement = select(Conversation).where(
                     Conversation.id == conversation_id_int,
-                    Conversation.user_id == user_id_str
+                    Conversation.user_id == user_id_int
                 )
                 conversation_result = db.exec(statement).first()
 
@@ -213,8 +210,8 @@ def chat_endpoint(
             print("DEBUG: Creating new conversation")
             conversation_data = ConversationCreate(title="New Conversation")  # Provide a default title
             conversation = Conversation(
-                **conversation_data.model_dump(),  # Use model_dump() instead of dict()
-                user_id=user_id_str
+                **conversation_data.model_dump(),
+                user_id=user_id_int
             )
             db.add(conversation)
             db.commit()
@@ -244,7 +241,7 @@ def chat_endpoint(
         user_message = Message(
             **message_data.model_dump(exclude_unset=True),  # Use model_dump() instead of dict()
             conversation_id=conversation.id,
-            user_id=user_id_str  # Added user_id
+            user_id=user_id_int
         )
         db.add(user_message)
         db.commit()
@@ -278,7 +275,7 @@ def chat_endpoint(
                     print(f"DEBUG: OpenAI tool call: {func_name}({func_args})")
 
                     # Execute the tool
-                    tool_result = execute_tool_call(func_name, func_args, user_id_str)
+                    tool_result = execute_tool_call(func_name, func_args, str(user_id_int))
                     print(f"DEBUG: Tool result: {tool_result}")
 
                     final_tool_calls.append({
@@ -318,7 +315,7 @@ def chat_endpoint(
         assistant_message = Message(
             **assistant_message_data.model_dump(exclude_unset=True),  # Use model_dump() instead of dict()
             conversation_id=conversation.id,
-            user_id=user_id_str  # Added user_id
+            user_id=user_id_int
         )
         db.add(assistant_message)
         db.commit()
@@ -370,7 +367,7 @@ def get_user_conversations(
         user_id_int = current_user.id
 
     statement = select(Conversation).where(
-        Conversation.user_id == str(user_id_int)
+        Conversation.user_id == user_id_int
     ).order_by(Conversation.updated_at.desc())
     conversations = db.exec(statement).all()
 
@@ -411,7 +408,7 @@ def get_conversation_messages(
         conversation_id_int = int(conversation_id)
         statement = select(Conversation).where(
             Conversation.id == conversation_id_int,
-            Conversation.user_id == str(user_id_int)
+            Conversation.user_id == user_id_int
         )
         conversation_result = db.exec(statement).first()
 

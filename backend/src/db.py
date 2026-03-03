@@ -9,20 +9,13 @@ database_url = settings.database_url
 
 def get_engine():
     """Create and return database engine."""
-    # Add connection pool settings for PostgreSQL/Neon
-    connect_args = {}
-    if settings.database_url.startswith("postgresql"):
-        # Configure for PostgreSQL/Neon
-        connect_args = {
-            "pool_pre_ping": True,  # Verify connections before use
-            "pool_recycle": 300,    # Recycle connections every 5 minutes
-        }
+    engine_kwargs = {"echo": False}
 
-    return create_engine(
-        settings.database_url,
-        echo=False,
-        **connect_args
-    )
+    if settings.database_url.startswith("postgresql"):
+        engine_kwargs["pool_pre_ping"] = True
+        engine_kwargs["pool_recycle"] = 300
+
+    return create_engine(settings.database_url, **engine_kwargs)
 
 
 @contextmanager

@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 
-const _RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-const API_URL = _RAW_API_URL.startsWith('https://') ? _RAW_API_URL.replace(/^https:/, 'https:') : _RAW_API_URL;
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/^http:\/\//, 'https://').replace(/\/+$/, '');
 
 interface Task {
   id: number;

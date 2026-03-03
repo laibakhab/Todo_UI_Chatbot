@@ -11,7 +11,6 @@ router = APIRouter()
 
 
 @router.get("", response_model=List[TaskPublic])
-@router.get("/", response_model=List[TaskPublic])
 def get_tasks(
     current_user: UserPublicFromToken = Depends(get_current_user),
     session: Session = Depends(get_db)
@@ -23,7 +22,6 @@ def get_tasks(
 
 
 @router.post("", response_model=TaskPublic)
-@router.post("/", response_model=TaskPublic)
 def create_task(
     task: TaskCreate,
     current_user: UserPublicFromToken = Depends(get_current_user),
