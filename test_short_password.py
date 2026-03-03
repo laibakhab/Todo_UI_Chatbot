@@ -6,7 +6,7 @@ def test_short_password_signup():
     try:
         # Make a request to the signup endpoint with a short password
         response = requests.post(
-            "http://127.0.0.1:8000/api/auth/signup",
+            "https://127.0.0.1:8000/api/auth/signup",
             json={
                 "email": "shortpass@test.com",
                 "password": "pass123"  # Very short password to avoid bcrypt issues

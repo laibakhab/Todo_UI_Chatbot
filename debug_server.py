@@ -37,7 +37,7 @@ def test_chatbot():
     }
     
     try:
-        response = requests.post("http://127.0.0.1:8000/api/auth/signup", json=register_payload)
+        response = requests.post("https://127.0.0.1:8000/api/auth/signup", json=register_payload)
         print(f"Registration: {response.status_code}")
         
         if response.status_code == 200:
@@ -56,7 +56,7 @@ def test_chatbot():
                 "message": "Add a task to buy groceries"
             }
             
-            response = requests.post(f"http://127.0.0.1:8000/api/{user_id}/chat", json=chat_payload, headers=headers)
+            response = requests.post(f"https://127.0.0.1:8000/api/{user_id}/chat", json=chat_payload, headers=headers)
             print(f"Chat Response: {response.status_code}")
             print(f"Response Text: {response.text}")
             

@@ -6,7 +6,7 @@ def test_min_length_password_signup():
     try:
         # Make a request to the signup endpoint with minimum length password
         response = requests.post(
-            "http://127.0.0.1:8000/api/auth/signup",
+            "https://127.0.0.1:8000/api/auth/signup",
             json={
                 "email": "minlength@test.com",
                 "password": "pass1234"  # Exactly 8 characters

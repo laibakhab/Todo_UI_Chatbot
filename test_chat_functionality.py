@@ -99,7 +99,7 @@ def main():
     
     if success:
         print("\nChatbot is working correctly! You can:")
-        print("- Interact with it through the frontend at http://localhost:3000")
+        print("- Interact with it through the frontend at https://localhost:3000")
         print("- Use the API directly with authenticated requests")
         print("- Add, list, update, and complete tasks through the chat interface")
     else:

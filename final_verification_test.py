@@ -15,7 +15,7 @@ def verify_original_issues_fixed():
     try:
         # Test that the endpoint exists (not 404)
         response = requests.post(
-            "http://127.0.0.1:8000/api/auth/signup",
+            "https://127.0.0.1:8000/api/auth/signup",
             json={
                 "email": "verification@test.com",
                 "password": "verifypass123"

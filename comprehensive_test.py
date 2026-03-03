@@ -2,7 +2,7 @@ import requests
 import json
 
 # Test the chatbot functionality
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "https://127.0.0.1:8000"
 
 def test_health():
     """Test if the API is running"""

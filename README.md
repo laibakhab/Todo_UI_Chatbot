@@ -85,7 +85,7 @@ This is a full-stack Todo application with an AI chatbot that allows users to ma
 
 ## Usage
 
-1. Open your browser and navigate to `http://localhost:3000` (or the port shown by the frontend server)
+1. Open your browser and navigate to `https://localhost:3000` (or the port shown by the frontend server)
 2. Register a new account or sign in to an existing one
 3. Interact with the chatbot to manage your tasks:
    - "Add a task to buy groceries"
@@ -97,7 +97,7 @@ This is a full-stack Todo application with an AI chatbot that allows users to ma
 
 For development, both servers should be running simultaneously:
 - Backend: `${process.env.NEXT_PUBLIC_API_URL}`
-- Frontend: `http://localhost:3000`
+- Frontend: `https://localhost:3000`
 
 The frontend is configured to proxy API requests from `/api/*` to the backend server.
 

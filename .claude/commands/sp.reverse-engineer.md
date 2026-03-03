@@ -174,7 +174,7 @@ grep -r "log\|logger\|metric\|trace\|monitor" [codebase-path] --include="*.py" -
 grep -r "postgresql\|mysql\|mongodb\|redis\|sqlite" [codebase-path] --include="*.py" --include="*.ts" --include="*.go"
 
 # External APIs
-grep -r "http.get\|requests.post\|fetch\|axios\|http.Client" [codebase-path] --include="*.py" --include="*.ts" --include="*.go" | head -20
+grep -r "https.get\|requests.post\|fetch\|axios\|https.Client" [codebase-path] --include="*.py" --include="*.ts" --include="*.go" | head -20
 
 # Message queues
 grep -r "kafka\|rabbitmq\|sqs\|pubsub\|queue" [codebase-path] --include="*.py" --include="*.ts" --include="*.go"
@@ -269,7 +269,7 @@ For each major module/package:
 
 ```bash
 # External service calls
-grep -rn "http.get\|requests.post\|fetch\|axios\|http.Client" [codebase-path] --include="*.py" --include="*.ts" --include="*.go" | head -20
+grep -rn "https.get\|requests.post\|fetch\|axios\|https.Client" [codebase-path] --include="*.py" --include="*.ts" --include="*.go" | head -20
 
 # Database queries
 grep -rn "SELECT\|INSERT\|UPDATE\|DELETE\|query\|execute\|find\|create\|save" [codebase-path] --include="*.py" --include="*.ts" --include="*.go" | head -20
@@ -599,7 +599,7 @@ Create implementation plan:
 ## Layer Structure
 
 ### Layer 1: [Presentation/API Layer]
-- **Responsibility**: [Handle HTTP requests, input validation, response formatting]
+- **Responsibility**: [Handle HTTPS requests, input validation, response formatting]
 - **Components**:
   - [controllers/]: Request handlers
   - [middleware/]: Auth, logging, error handling
@@ -639,14 +639,14 @@ Create implementation plan:
 ## Data Flow
 
 ### Request Flow (Synchronous)
-1. **API Layer** receives HTTP request
+1. **API Layer** receives HTTPS request
 2. **Validation Middleware** validates input schema
 3. **Auth Middleware** verifies authentication
 4. **Controller** routes to appropriate service
 5. **Service Layer** executes business logic
 6. **Repository** persists/retrieves data
 7. **Service** formats response
-8. **Controller** returns HTTP response
+8. **Controller** returns HTTPS response
 
 ### Event Flow (Asynchronous) - if applicable
 1. **Event Producer** emits event to queue
@@ -1078,7 +1078,7 @@ This document captures the reusable intelligence embedded in the codebase—patt
 - **Never expose internal details**: Stack traces in development only, generic messages in production
 - **Consistent error schema**: All errors follow same structure `{error: {code, message, details, request_id}}`
 - **Log everything, return selectively**: Full context in logs, safe subset in API response
-- **Use HTTP status codes correctly**: 400 bad request, 401 unauthorized, 404 not found, 500 internal error
+- **Use HTTPS status codes correctly**: 400 bad request, 401 unauthorized, 404 not found, 500 internal error
 - **Provide request IDs**: Enable correlation between client errors and server logs
 
 **Implementation Pattern** (observed in codebase):
@@ -1121,7 +1121,7 @@ if not user:
 - Any system with external-facing interfaces
 
 **Contraindications**:
-- Internal services (may prefer exceptions without HTTP semantics)
+- Internal services (may prefer exceptions without HTTPS semantics)
 - Real-time systems (error objects may be too heavy)
 
 ---

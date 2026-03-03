@@ -6,7 +6,7 @@ def test_successful_signup():
     try:
         # Make a request to the signup endpoint with valid data
         response = requests.post(
-            "http://127.0.0.1:8000/api/auth/signup",
+            "https://127.0.0.1:8000/api/auth/signup",
             json={
                 "email": "successful@test.com",
                 "password": "validpass123"

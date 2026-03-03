@@ -45,7 +45,7 @@ def test_chatbot_functionality():
     
     # Test 1: Check if server is running
     try:
-        response = requests.get("http://127.0.0.1:8000/health", timeout=5)
+        response = requests.get("https://127.0.0.1:8000/health", timeout=5)
         if response.status_code == 200:
             print("✓ Server is running")
         else:
@@ -60,7 +60,7 @@ def test_chatbot_functionality():
     password = "password123"
     
     try:
-        register_resp = requests.post("http://127.0.0.1:8000/api/auth/signup", json={
+        register_resp = requests.post("https://127.0.0.1:8000/api/auth/signup", json={
             "email": email,
             "password": password
         }, timeout=10)
@@ -76,7 +76,7 @@ def test_chatbot_functionality():
     
     # Test 3: Login to get token
     try:
-        login_resp = requests.post("http://127.0.0.1:8000/api/auth/signin", json={
+        login_resp = requests.post("https://127.0.0.1:8000/api/auth/signin", json={
             "email": email,
             "password": password
         }, timeout=10)
@@ -100,7 +100,7 @@ def test_chatbot_functionality():
             "Content-Type": "application/json"
         }
         
-        chat_resp = requests.post(f"http://127.0.0.1:8000/api/{user_id}/chat", json={
+        chat_resp = requests.post(f"https://127.0.0.1:8000/api/{user_id}/chat", json={
             "message": "Add a task to buy groceries"
         }, headers=headers, timeout=10)
         

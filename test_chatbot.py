@@ -77,7 +77,7 @@ def main():
     if health_ok and root_ok and auth_ok:
         print("\n[SUCCESS] All tests passed! The chatbot backend is working correctly.")
         print("\nYou can now:")
-        print("- Access the frontend at http://localhost:3000")
+        print("- Access the frontend at https://localhost:3000")
         print("- Use the API endpoints at ${process.env.NEXT_PUBLIC_API_URL}/api/")
         print("- Register/login users at /api/auth/signup and /api/auth/signin")
         print("- Interact with tasks at /api/tasks/")
