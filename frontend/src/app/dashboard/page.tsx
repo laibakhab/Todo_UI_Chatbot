@@ -1,34 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '../../lib/auth-context';
 import { useRouter } from 'next/navigation';
 import TaskList from '../../components/TaskList';
 import AddTaskForm from '../../components/AddTaskForm';
 
 export default function DashboardPage() {
-  const { user, token, logout } = useAuth();
+  const { user, token, logout, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
+    if (!authLoading && !token) {
       router.push('/signin');
-    } else {
-      setLoading(false);
     }
-  }, [token, router]);
+  }, [token, authLoading, router]);
 
   const handleLogout = () => {
     logout();
   };
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading...</div>
       </div>
     );
+  }
+
+  if (!token) {
+    return null;
   }
 
   return (
