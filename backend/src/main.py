@@ -1,28 +1,31 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 from .routers import auth, tasks, chat, mcp
 from .models import user, task, chat_models
 from .db import get_engine
 from sqlmodel import SQLModel
 
 
-class ForceHTTPSMiddleware(BaseHTTPMiddleware):
-    """Rewrite scope['scheme'] to https when behind a TLS-terminating proxy."""
+class ForceHTTPSMiddleware:
+    """Raw ASGI middleware — rewrites scheme to https before anything else runs."""
 
-    async def dispatch(self, request: Request, call_next):
-        proto = request.headers.get("x-forwarded-proto")
-        if proto == "https":
-            request.scope["scheme"] = "https"
-        return await call_next(request)
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] in ("http", "websocket"):
+            headers = dict(scope.get("headers", []))
+            if headers.get(b"x-forwarded-proto") == b"https":
+                scope["scheme"] = "https"
+        await self.app(scope, receive, send)
 
 
 app = FastAPI(title="Todo API", version="1.0.0", redirect_slashes=False)
 
-# Force HTTPS scheme before anything else
+# Force HTTPS scheme — raw ASGI, outermost layer
 app.add_middleware(ForceHTTPSMiddleware)
 
-# CORS middleware — allow Vercel frontend + local dev
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -32,6 +35,7 @@ app.add_middleware(
         "http://localhost:3003",
         "http://localhost:3004",
         "https://frontend-six-swart-57.vercel.app",
+        "https://todo-ui-chatbot.vercel.app",
         "https://laibaasif-chatbot.hf.space",
     ],
     allow_origin_regex=r"https://.*\.vercel\.app",
