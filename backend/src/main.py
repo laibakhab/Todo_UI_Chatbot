@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 from .routers import auth, tasks, chat, mcp
 from .models import user, task, chat_models
 from .db import get_engine
@@ -24,6 +25,10 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Respect proxy headers (X-Forwarded-Proto, X-Forwarded-For) so generated
+# redirects and URL building use the original scheme/host when behind a proxy.
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=("*") )
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
