@@ -8,7 +8,8 @@
     "dev": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend run build",
     "start": "npm --prefix frontend run start",
-    "preview": "npm --prefix frontend run preview"
+    "preview": "npm --prefix frontend run preview",
+    "postinstall": "npm install --prefix frontend"
   },
   "dependencies": {
     "react": "^18.2.0",
