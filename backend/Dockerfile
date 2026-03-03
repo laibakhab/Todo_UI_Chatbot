@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 7860
 
 # Run the application on port 7860 for Hugging Face Spaces
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "7860", "--proxy-headers", "--forwarded-allow-ips", "*"]

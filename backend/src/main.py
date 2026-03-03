@@ -1,12 +1,26 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from .routers import auth, tasks, chat, mcp
 from .models import user, task, chat_models
 from .db import get_engine
 from sqlmodel import SQLModel
 
+
+class ForceHTTPSMiddleware(BaseHTTPMiddleware):
+    """Rewrite scope['scheme'] to https when behind a TLS-terminating proxy."""
+
+    async def dispatch(self, request: Request, call_next):
+        proto = request.headers.get("x-forwarded-proto")
+        if proto == "https":
+            request.scope["scheme"] = "https"
+        return await call_next(request)
+
+
 app = FastAPI(title="Todo API", version="1.0.0", redirect_slashes=False)
+
+# Force HTTPS scheme before anything else
+app.add_middleware(ForceHTTPSMiddleware)
 
 # CORS middleware — allow Vercel frontend + local dev
 app.add_middleware(
@@ -25,10 +39,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
-
-# Respect proxy headers (X-Forwarded-Proto, X-Forwarded-For) so generated
-# redirects and URL building use the original scheme/host when behind a proxy.
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=("*") )
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
