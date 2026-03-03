@@ -189,7 +189,7 @@ def chat_endpoint(
                 conversation_id_int = int(request.conversation_id)
                 statement = select(Conversation).where(
                     Conversation.id == conversation_id_int,
-                    Conversation.user_id == user_id_int
+                    Conversation.user_id == str(user_id_int)
                 )
                 conversation_result = db.exec(statement).first()
 
@@ -211,7 +211,7 @@ def chat_endpoint(
             conversation_data = ConversationCreate(title="New Conversation")  # Provide a default title
             conversation = Conversation(
                 **conversation_data.model_dump(),
-                user_id=user_id_int
+                user_id=str(user_id_int)
             )
             db.add(conversation)
             db.commit()
@@ -241,7 +241,7 @@ def chat_endpoint(
         user_message = Message(
             **message_data.model_dump(exclude_unset=True),  # Use model_dump() instead of dict()
             conversation_id=conversation.id,
-            user_id=user_id_int
+            user_id=str(user_id_int)
         )
         db.add(user_message)
         db.commit()
@@ -315,7 +315,7 @@ def chat_endpoint(
         assistant_message = Message(
             **assistant_message_data.model_dump(exclude_unset=True),  # Use model_dump() instead of dict()
             conversation_id=conversation.id,
-            user_id=user_id_int
+            user_id=str(user_id_int)
         )
         db.add(assistant_message)
         db.commit()
@@ -367,7 +367,7 @@ def get_user_conversations(
         user_id_int = current_user.id
 
     statement = select(Conversation).where(
-        Conversation.user_id == user_id_int
+        Conversation.user_id == str(user_id_int)
     ).order_by(Conversation.updated_at.desc())
     conversations = db.exec(statement).all()
 
@@ -408,7 +408,7 @@ def get_conversation_messages(
         conversation_id_int = int(conversation_id)
         statement = select(Conversation).where(
             Conversation.id == conversation_id_int,
-            Conversation.user_id == user_id_int
+            Conversation.user_id == str(user_id_int)
         )
         conversation_result = db.exec(statement).first()
 

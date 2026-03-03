@@ -16,14 +16,11 @@ class ConversationBase(SQLModel):
 class Conversation(ConversationBase, table=True):
     """Conversation model representing a chat conversation."""
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", nullable=False)
+    user_id: str = Field(nullable=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
 
-    # Relationship to User
-    user: Optional["User"] = Relationship(back_populates="conversations")
-
-    # Relationship to Messages # PHASE 3 ADDITION
+    # Relationship to Messages
     messages: Optional[List["Message"]] = Relationship(back_populates="conversation")
 
 
@@ -37,7 +34,7 @@ class Message(MessageBase, table=True):
     """Message model representing a chat message."""
     id: Optional[int] = Field(default=None, primary_key=True)
     conversation_id: int = Field(foreign_key="conversation.id", nullable=False)
-    user_id: int = Field(foreign_key="user.id", nullable=False)  # Added user_id field
+    user_id: str = Field(nullable=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)  # Changed from timestamp to created_at to match DB
 
     # Relationship to Conversation
@@ -52,7 +49,7 @@ class ConversationCreate(ConversationBase):
 class ConversationPublic(ConversationBase):
     """Public schema for returning conversation data."""
     id: int
-    user_id: int
+    user_id: str
     created_at: datetime
     updated_at: datetime
 
@@ -66,5 +63,5 @@ class MessagePublic(MessageBase):
     """Public schema for returning message data."""
     id: int
     conversation_id: int
-    user_id: int  # Added user_id field
-    created_at: datetime  # Changed from timestamp to created_at to match DB
+    user_id: str
+    created_at: datetime

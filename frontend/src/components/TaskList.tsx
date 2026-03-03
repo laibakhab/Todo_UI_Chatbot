@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import TaskItem from './TaskItem';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/^http:\/\//, 'https://').replace(/\/+$/, '');
+import { API_URL, fetchWithRetry } from '../lib/api';
 
 interface Task {
   id: number;
@@ -31,7 +30,7 @@ export default function TaskList() {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${API_URL}/api/tasks`, {
+      const response = await fetchWithRetry(`${API_URL}/api/tasks`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

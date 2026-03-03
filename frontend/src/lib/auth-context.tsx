@@ -2,8 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/^http:\/\//, 'https://').replace(/\/+$/, '');
+import { API_URL, fetchWithRetry } from './api';
   
 interface User {
   id: number;
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/auth/signin`, {
+      const response = await fetchWithRetry(`${API_URL}/api/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/auth/signup`, {
+      const response = await fetchWithRetry(`${API_URL}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

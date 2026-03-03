@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/^http:\/\//, 'https://').replace(/\/+$/, '');
+import { API_URL, fetchWithRetry } from '../lib/api';
 
 interface Task {
   id: number;
@@ -33,7 +32,7 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${API_URL}/api/tasks/${task.id}/toggle`, {
+      const response = await fetchWithRetry(`${API_URL}/api/tasks/${task.id}/toggle`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -79,7 +78,7 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${API_URL}/api/tasks/${task.id}`, {
+      const response = await fetchWithRetry(`${API_URL}/api/tasks/${task.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -132,7 +131,7 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${API_URL}/api/tasks/${task.id}`, {
+      const response = await fetchWithRetry(`${API_URL}/api/tasks/${task.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

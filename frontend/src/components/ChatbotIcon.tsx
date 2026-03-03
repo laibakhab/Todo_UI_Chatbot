@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaComments, FaTimes } from 'react-icons/fa';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/^http:\/\//, 'https://').replace(/\/+$/, '');
+import { API_URL, fetchWithRetry } from '../lib/api';
 
 interface ChatMessage {
   id: string;
@@ -77,7 +76,7 @@ const ChatbotIcon: React.FC = () => {
         throw new Error('User ID not found. Please login again.');
       }
 
-      const response = await fetch(`${API_URL}/api/${userId}/chat`, {
+      const response = await fetchWithRetry(`${API_URL}/api/${userId}/chat`, {
         method: 'POST',                       
         headers: {
           'Content-Type': 'application/json',

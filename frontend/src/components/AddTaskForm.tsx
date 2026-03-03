@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/^http:\/\//, 'https://').replace(/\/+$/, '');
+import { API_URL, fetchWithRetry } from '../lib/api';
 
 interface Task {
   id: number;
@@ -41,7 +40,7 @@ export default function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
         throw new Error('No authentication token found. Please log in.');
       }
 
-      const response = await fetch(`${API_URL}/api/tasks`, {
+      const response = await fetchWithRetry(`${API_URL}/api/tasks`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
