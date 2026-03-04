@@ -17,15 +17,20 @@ interface TaskItemProps {
   task: Task;
   onUpdate: (updatedTask: Task) => void;
   onDelete: (taskId: number) => void;
+  index?: number;
 }
 
-export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
+export default function TaskItem({ task, onUpdate, onDelete, index = 0 }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
   const [error, setError] = useState<string | null>(null);
+  const [isToggling, setIsToggling] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleToggleComplete = async () => {
+    if (isToggling) return;
+    setIsToggling(true);
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -62,10 +67,12 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
       onUpdate(updatedTask);
     } catch (err) {
       if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Network error: Unable to connect to the server. Please check your connection and try again.');
+        setError('Network error: Unable to connect to the server.');
       } else {
         setError(err instanceof Error ? err.message : 'Error updating task');
       }
+    } finally {
+      setIsToggling(false);
     }
   };
 
@@ -113,7 +120,7 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
       setIsEditing(false);
     } catch (err) {
       if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Network error: Unable to connect to the server. Please check your connection and try again.');
+        setError('Network error: Unable to connect to the server.');
       } else {
         setError(err instanceof Error ? err.message : 'Error updating task');
       }
@@ -124,6 +131,7 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
     if (!window.confirm('Are you sure you want to delete this task?')) {
       return;
     }
+    setIsDeleting(true);
 
     try {
       const token = localStorage.getItem('token');
@@ -160,50 +168,72 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
       onDelete(task.id);
     } catch (err) {
       if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Network error: Unable to connect to the server. Please check your connection and try again.');
+        setError('Network error: Unable to connect to the server.');
       } else {
         setError(err instanceof Error ? err.message : 'Error deleting task');
       }
+      setIsDeleting(false);
     }
   };
 
+  const delay = Math.min(index * 50, 300);
+
   if (isEditing) {
     return (
-      <li className="p-4 border-b border-[var(--gray-700)] hover-lift transition-all duration-200">
-        <form onSubmit={handleUpdate} className="space-y-4">
+      <li
+        className="px-4 sm:px-5 py-4 border-b transition-all duration-200"
+        style={{ borderColor: 'var(--border-primary)', background: 'var(--bg-elevated)' }}
+      >
+        <form onSubmit={handleUpdate} className="space-y-3">
           {error && (
-            <div className="text-sm text-red-400">{error}</div>
+            <div className="text-sm font-medium px-3 py-2 rounded-lg" style={{ background: 'var(--danger-light)', color: 'var(--danger)' }} role="alert">
+              {error}
+            </div>
           )}
-          <div>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="block w-full px-4 py-3 rounded-lg border border-[var(--gray-600)] bg-[var(--gray-800)] text-[var(--gray-100)] placeholder-[var(--gray-400)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-500)] focus:border-[var(--indigo-500)] sm:text-sm transition-all duration-200"
-              required
-            />
-          </div>
-          <div>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="block w-full px-4 py-3 rounded-lg border border-[var(--gray-600)] bg-[var(--gray-800)] text-[var(--gray-100)] placeholder-[var(--gray-400)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-500)] focus:border-[var(--indigo-500)] sm:text-sm transition-all duration-200"
-              rows={3}
-            />
-          </div>
-          <div className="flex justify-end space-x-3">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="block w-full px-4 py-2.5 rounded-lg text-sm"
+            style={{
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              color: 'var(--text-primary)',
+            }}
+            required
+            aria-label="Edit task title"
+            autoFocus
+          />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="block w-full px-4 py-2.5 rounded-lg text-sm resize-none"
+            style={{
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              color: 'var(--text-primary)',
+            }}
+            rows={2}
+            aria-label="Edit task description"
+            placeholder="Description (optional)"
+          />
+          <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={() => setIsEditing(false)}
-              className="px-4 py-2 text-sm font-medium text-[var(--gray-400)] border border-[var(--gray-600)] rounded-lg hover:bg-[var(--gray-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--indigo-500)] transition-colors duration-200"
+              onClick={() => {
+                setIsEditing(false);
+                setTitle(task.title);
+                setDescription(task.description || '');
+              }}
+              className="btn btn-ghost text-xs px-4 py-2"
             >
-              CANCEL
+              Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-[var(--indigo-500)] rounded-lg hover:bg-[var(--indigo-600)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--indigo-500)] transition-colors duration-200"
+              className="btn btn-primary text-xs px-4 py-2"
             >
-              SAVE
+              Save Changes
             </button>
           </div>
         </form>
@@ -212,42 +242,117 @@ export default function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
   }
 
   return (
-    <li className="p-4 border-b border-[var(--gray-700)] hover-lift transition-all duration-200 group">
+    <li
+      className="px-4 sm:px-5 py-3.5 border-b transition-all duration-200 group"
+      style={{
+        borderColor: 'var(--border-primary)',
+        animationDelay: `${delay}ms`,
+        animationFillMode: 'both',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'var(--bg-hover)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'transparent';
+      }}
+    >
       {error && (
-        <div className="text-sm text-red-400 mb-2">{error}</div>
+        <div className="text-xs font-medium px-3 py-2 rounded-lg mb-2" style={{ background: 'var(--danger-light)', color: 'var(--danger)' }} role="alert">
+          {error}
+        </div>
       )}
-      <div className="flex items-start">
-        <div className="flex items-center h-6 mt-1">
+      <div className="flex items-start gap-3">
+        {/* Checkbox */}
+        <div className="pt-0.5">
           <input
-            id={`completed-${task.id}`}
+            id={`task-${task.id}`}
             type="checkbox"
             checked={task.completed}
             onChange={handleToggleComplete}
-            className="h-5 w-5 rounded border-[var(--gray-600)] bg-[var(--gray-800)] text-[var(--indigo-500)] focus:ring-[var(--indigo-500)] focus:ring-offset-0 cursor-pointer transition-all duration-200"
+            disabled={isToggling}
+            aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
           />
         </div>
-        <div className="ml-4 min-w-0 flex-1">
-          <p className={`text-base font-medium ${task.completed ? 'line-through text-[var(--emerald-500)]' : 'text-[var(--gray-100)]'} transition-all duration-200`}>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <label
+            htmlFor={`task-${task.id}`}
+            className="text-sm font-medium cursor-pointer transition-all duration-200 block"
+            style={{
+              color: task.completed ? 'var(--success)' : 'var(--text-primary)',
+              textDecoration: task.completed ? 'line-through' : 'none',
+              opacity: task.completed ? 0.7 : 1,
+            }}
+          >
             {task.title}
-          </p>
+          </label>
           {task.description && (
-            <p className={`text-sm mt-1 ${task.completed ? 'line-through text-[var(--emerald-500)]/70' : 'text-[var(--gray-400)]'}`}>
+            <p
+              className="text-xs mt-0.5 leading-relaxed"
+              style={{
+                color: task.completed ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                textDecoration: task.completed ? 'line-through' : 'none',
+                opacity: task.completed ? 0.6 : 1,
+              }}
+            >
               {task.description}
             </p>
           )}
         </div>
-        <div className="ml-4 flex-shrink-0 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+
+        {/* Actions - visible on hover (desktop) or always (mobile) */}
+        <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
           <button
             onClick={() => setIsEditing(true)}
-            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-[var(--amber-500)] border border-[var(--amber-500)] rounded-lg hover:bg-[var(--amber-500)] hover:text-[var(--gray-950)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--amber-500)] transition-colors duration-200"
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+            style={{
+              color: 'var(--warning)',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--warning-light)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+            aria-label={`Edit "${task.title}"`}
+            title="Edit task"
           >
-            EDIT
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
           </button>
           <button
             onClick={handleDelete}
-            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-[var(--red-500)] border border-[var(--red-500)] rounded-lg hover:bg-[var(--red-500)] hover:text-[var(--gray-950)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--red-500)] transition-colors duration-200"
+            disabled={isDeleting}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+            style={{
+              color: 'var(--danger)',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--danger-light)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+            aria-label={`Delete "${task.title}"`}
+            title="Delete task"
           >
-            DELETE
+            {isDeleting ? (
+              <svg className="w-4 h-4" style={{ animation: 'spin 0.8s linear infinite' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+            )}
           </button>
         </div>
       </div>

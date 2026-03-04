@@ -22,6 +22,7 @@ export default function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +75,7 @@ export default function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
       const newTask = await response.json();
       setTitle('');
       setDescription('');
+      setShowDescription(false);
 
       if (onTaskAdded) {
         onTaskAdded(newTask);
@@ -90,76 +92,129 @@ export default function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
   };
 
   return (
-    <div className="slide-in">
-      <div className="md:grid md:grid-cols-3 md:gap-6">
-        <div className="md:col-span-1">
-          <h3 className="text-xl font-bold font-inter text-[var(--gray-100)]">Add New Task</h3>
-          <p className="mt-2 text-sm text-[var(--gray-400)]">Create a new task for your todo list.</p>
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center"
+          style={{ background: 'var(--accent-primary-light)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
         </div>
-        <div className="mt-5 md:mt-0 md:col-span-2">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="rounded-md bg-red-900/30 p-4 border border-[var(--red-500)]">
-                <div className="text-sm text-red-400">{error}</div>
-              </div>
-            )}
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-              <div className="sm:col-span-6">
-                <label htmlFor="title" className="block text-sm font-medium text-[var(--gray-400)]">
-                  TITLE *
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="py-3 px-4 block w-full max-w-lg rounded-lg border border-[var(--gray-600)] bg-[var(--gray-800)] text-[var(--gray-100)] placeholder-[var(--gray-400)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-500)] focus:border-[var(--indigo-500)] sm:max-w-xs sm:text-sm transition-all duration-200"
-                    placeholder="Task title"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              <div className="sm:col-span-6">
-                <label htmlFor="description" className="block text-sm font-medium text-[var(--gray-400)]">
-                  DESCRIPTION
-                </label>
-                <div className="mt-1">
-                  <textarea
-                    id="description"
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="py-3 px-4 block w-full max-w-lg rounded-lg border border-[var(--gray-600)] bg-[var(--gray-800)] text-[var(--gray-100)] placeholder-[var(--gray-400)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-500)] focus:border-[var(--indigo-500)] sm:text-sm transition-all duration-200"
-                    placeholder="Task description (optional)"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="mt-6">
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex justify-center py-3 px-6 border border-transparent text-sm font-medium rounded-lg text-white bg-[var(--indigo-500)] hover:bg-[var(--indigo-600)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--indigo-500)] disabled:opacity-50 transition-colors duration-200 hover-lift"
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="https://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    CREATING...
-                  </span>
-                ) : (
-                  'ADD TASK'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+        <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+          Add New Task
+        </h3>
       </div>
+
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <div
+            className="mb-4 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2"
+            style={{ background: 'var(--danger-light)', color: 'var(--danger)', border: '1px solid var(--danger)' }}
+            role="alert"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            {error}
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <label htmlFor="title" className="sr-only">Task title</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-sm"
+              style={{
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-primary)',
+                color: 'var(--text-primary)',
+              }}
+              placeholder="What needs to be done?"
+              disabled={loading}
+              aria-label="Task title"
+              aria-required="true"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowDescription(!showDescription)}
+              className="px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1.5"
+              style={{
+                background: showDescription ? 'var(--accent-primary-light)' : 'var(--bg-tertiary)',
+                color: showDescription ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                border: '1px solid var(--border-primary)',
+              }}
+              aria-label={showDescription ? 'Hide description field' : 'Add a description'}
+              title="Toggle description"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="17" y1="10" x2="3" y2="10"/>
+                <line x1="21" y1="6" x2="3" y2="6"/>
+                <line x1="21" y1="14" x2="3" y2="14"/>
+                <line x1="17" y1="18" x2="3" y2="18"/>
+              </svg>
+              <span className="hidden sm:inline">Details</span>
+            </button>
+
+            <button
+              type="submit"
+              disabled={loading || !title.trim()}
+              className="btn btn-primary px-5 py-3 text-sm"
+              aria-label="Add task"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4" style={{ animation: 'spin 0.8s linear infinite' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round"/>
+                  </svg>
+                  Adding...
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Add Task
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Expandable description */}
+        {showDescription && (
+          <div className="mt-3 fade-in-up">
+            <label htmlFor="description" className="sr-only">Task description</label>
+            <textarea
+              id="description"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-sm resize-none"
+              style={{
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-primary)',
+                color: 'var(--text-primary)',
+              }}
+              placeholder="Add more details about this task..."
+              disabled={loading}
+              aria-label="Task description"
+            />
+          </div>
+        )}
+      </form>
     </div>
   );
 }
