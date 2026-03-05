@@ -101,7 +101,35 @@ const ChatbotIcon: React.FC = () => {
       });
 
       if (!response.ok) {
-        if (response.status === 403) {
+        if (response.status === 404 && conversationId) {
+          // Stale conversation ID (DB may have been reset) — clear and retry
+          setConversationId(null);
+          localStorage.removeItem('chatbot-conversation-id');
+          const retryResponse = await fetchWithRetry(`${API_URL}/api/${userId}/chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ message: messageText })
+          });
+          if (!retryResponse.ok) {
+            throw new Error(`HTTP error! status: ${retryResponse.status}`);
+          }
+          const retryData = await retryResponse.json();
+          if (retryData.conversation_id) {
+            setConversationId(retryData.conversation_id);
+            localStorage.setItem('chatbot-conversation-id', retryData.conversation_id);
+          }
+          const aiMessage: ChatMessage = {
+            id: `ai-${Date.now()}`,
+            role: 'assistant',
+            content: retryData.response,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, aiMessage]);
+          return;
+        } else if (response.status === 403) {
           const errorMessage: ChatMessage = {
             id: `error-${Date.now()}`,
             role: 'assistant',
