@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import auth, tasks, chat, mcp
@@ -20,7 +21,17 @@ class ForceHTTPSMiddleware:
         await self.app(scope, receive, send)
 
 
-app = FastAPI(title="Todo API", version="1.0.0", redirect_slashes=False)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events."""
+    # Startup
+    engine = get_engine()
+    SQLModel.metadata.create_all(engine)
+    yield
+    # Shutdown (cleanup if needed)
+
+
+app = FastAPI(title="Todo API", version="1.0.0", redirect_slashes=False, lifespan=lifespan)
 
 # Force HTTPS scheme — raw ASGI, outermost layer
 app.add_middleware(ForceHTTPSMiddleware)
@@ -59,13 +70,6 @@ app.include_router(mcp.router, prefix="/api/mcp", tags=["mcp"])
 @app.get("/")
 def read_root():
     return {"message": "Todo API is running"}
-
-
-@app.on_event("startup")
-def on_startup():
-    """Create database tables on startup."""
-    engine = get_engine()
-    SQLModel.metadata.create_all(engine)
 
 
 @app.get("/health")
